@@ -86,7 +86,7 @@ def scrape_for_package_info(buildroot_test)
   end
 end
 
-def scrape_test_information(page)
+def scrape_test_information(page, abort_on_repeat = true)
   added_entries = []
   puts "Parsing page #{page}"
 
@@ -127,20 +127,29 @@ def scrape_test_information(page)
       #puts a
       if(br_test.arch =~ /^arc/)
 	print " (ARC)"
+        failed_to_add = false
 	begin
       	  br_test.save!
 	  added_entries << br_test
 	rescue(DataObjects::IntegrityError)
       	  puts "Row for date #{br_test.date} already exists!"
-      	  return nil;
+	  if(abort_on_repeat == true)
+      	    return nil;
+	  else
+ 	    # Clear list of tests to save
+	    to_save = [] 
+	    failed_to_add = true
+	  end
       	end
 
-      	to_save.each do |elems|
-      	  elems.buildroot_test = br_test
-      	  elems.save!
-      	end
+	if(!failed_to_add)
+      	  to_save.each do |elems|
+      	    elems.buildroot_test = br_test
+      	    elems.save!
+      	  end
 
-	scrape_for_package_info (br_test)
+	  scrape_for_package_info (br_test)
+	end
       end
       puts ""
     end
@@ -148,9 +157,8 @@ def scrape_test_information(page)
   return added_entries
 end
 
-def traverse_page()
+def traverse_page(start = 0)
   do_next = true
-  start = 0;
 
   while(do_next)
     page = "#{MAIN_PAGE}?start=#{start}"
@@ -162,4 +170,10 @@ end
 
 def scrape_site() 
   traverse_page()
+end
+
+def add_from_page(page_num)
+    page = "#{MAIN_PAGE}?start=#{page_num}"
+    puts page
+    ret = scrape_test_information(page, false)
 end

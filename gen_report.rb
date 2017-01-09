@@ -22,7 +22,8 @@ cmd = "curl http://nl20droid2:9999/report/?start=#{time_start.to_i}&end=#{time_e
 
 puts cmd
 
-from="cmiranda@synopsys.com"
+#from="cmiranda@synopsys.com"
+from="Buildroot Autobuilder #{message_prefix} Reporter <arcgnu_verif+buildroot+#{message_prefix.downcase}@synopsys.com>"
 to=[
 	"fbedard@synopsys.com",
 	"abrodkin@synopsys.com",
@@ -33,6 +34,7 @@ to=[
 	"paltsev@synopsys.com",
 	"vzakhar@synopsys.com",
 ]
+#to=["cmiranda@synopsys.com"]
 
 f = File.open("/tmp/report", "w")
 
